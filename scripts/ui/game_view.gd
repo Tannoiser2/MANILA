@@ -132,6 +132,8 @@ func _build_top() -> void:
 	vb.add_child(top_lbl)
 	sub_lbl = UI.label("", 19, Color("#f3dfb8"))
 	vb.add_child(sub_lbl)
+	hb.add_child(Audio.toggle_button("music", 140, 48))
+	hb.add_child(Audio.toggle_button("sfx", 140, 48))
 	for spec in [["Regole", _show_rules_popup], ["Diario", _show_log], ["Menu", _ask_quit]]:
 		var b := UI.button(spec[0], 0, 48, 21)
 		b.custom_minimum_size.x = 100
@@ -506,12 +508,28 @@ func _on_log(t: String) -> void:
 
 
 func _on_fx(kind: String, data: Dictionary) -> void:
+	Audio.suspended = online != null and online.catchup
 	match kind:
 		"roll":
 			last_dice = data["dice"]
 			board.roll_dice(last_dice)
 			_refresh_dice()
+			Audio.play("dice")
+			if not (online != null and online.catchup):
+				get_tree().create_timer(1.3).timeout.connect(func(): Audio.play("splash", -3.0))
+		"place":
+			Audio.play("pawn")
+		"dock":
+			Audio.play("bell", -5.0)
+		"plunder":
+			Audio.play("cannon", -2.0)
+		"board":
+			Audio.play("cannon", -9.0)
+		"market":
+			if engine.boats.any(func(b): return b["at"] == "harbor"):
+				Audio.play("market", -3.0)
 		"launch":
+			Audio.play("splash", -4.0)
 			last_dice = []
 			_refresh_dice()
 			board.set_preview({})
@@ -539,6 +557,7 @@ func _on_decision(req: Dictionary) -> void:
 	pending = req
 	refresh()
 	_clear_body()
+	Audio.play("turn", -8.0)
 	act_title.text = _who() + str(req.get("title", "")) + ("  ·  clic su un anello luminoso o su un pulsante" if req["type"] == "place" else "")
 	match str(req["type"]):
 		"bid":
@@ -880,6 +899,8 @@ func _on_pause(req: Dictionary) -> void:
 	if req.get("type", "") != "voyage_end":
 		engine.provide_decision(null)
 		return
+	Audio.play("voyage", -3.0)
+	get_tree().create_timer(0.5).timeout.connect(func(): Audio.play("coin", -4.0))
 	var vb := _open_modal("Fine del viaggio %d" % int(req["voyage"]), 760)
 	for s in engine.n:
 		var items: Array = engine.income.get(s, [])
@@ -916,6 +937,7 @@ func _on_pause(req: Dictionary) -> void:
 
 
 func _on_game_end(results: Array) -> void:
+	Audio.play("win")
 	if online != null:
 		online.finish()
 		online_status("")

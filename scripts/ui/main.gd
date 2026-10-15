@@ -27,6 +27,12 @@ func _ready() -> void:
 	bg.color = Color("#06100f")
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var au := Audio.new()
+	add_child(au)
+	# ogni pulsante fa il suo clic di legno
+	get_tree().node_added.connect(func(n):
+		if n is BaseButton:
+			(n as BaseButton).pressed.connect(func(): Audio.play("click", -6.0)))
 	add_child(bg)
 	show_menu()
 

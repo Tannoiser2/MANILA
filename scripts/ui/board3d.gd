@@ -106,7 +106,7 @@ func _build_env() -> void:
 	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	e.ambient_light_color = Color("#b9d8d0")
 	e.ambient_light_energy = 0.28
-	e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	e.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	e.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
 	e.background_energy_multiplier = 0.9
 	env.environment = e
@@ -152,7 +152,7 @@ func _build_board() -> void:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_texture = load("res://assets/board/board.jpg")
 	mat.roughness = 1.0
-	mat.metallic_specular = 0.1
+	mat.metallic_specular = 0.0
 	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
 	top.material_override = mat
 	top.position.y = 0.002

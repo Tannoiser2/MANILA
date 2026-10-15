@@ -17,6 +17,10 @@ modulo Tabletop Simulator e non vanno distribuite pubblicamente.
 - **Grafica "caraibica"**: pergamene dai bordi strappati, assi di legno, mare turchese e corallo, titoli in
   Pirata One e testo in Alegreya Sans; il tabellone è un isolotto di sabbia con le palme in mezzo al mare,
   sotto un cielo tropicale.
+- **Musica ed effetti sonori**: un calypso morbido con steel drum in loop, dadi, pedoni di legno, onde,
+  campana del molo, cannone dei pirati, monete e arpeggi a fine viaggio. Si spengono separatamente (Musica /
+  Effetti, nel menu e in partita) e la scelta resta salvata. Tutto è sintetizzato da
+  `tools/sintetizza_audio.py`, senza campioni esterni.
 - **Porto in 3D**: il tabellone del modulo TTS, i barconi dal modello `Manila_Boat_Correct.stl` con le
   tessere carico, complici col cappello conico, dadi dei colori delle merci, segnalini del mercato nero.
   Trascina col mouse per ruotare, rotella o pizzico per lo zoom, tasto destro (o Maiusc+trascina) per
@@ -83,6 +87,7 @@ scripts/ui/game_view.gd      interfaccia di gioco
 scripts/ui/menu.gd           menu, varianti, stanze online
 scripts/net/                 Firebase (REST) e partita online in lockstep
 assets/                      tabellone, tessere carico, carte quota, monete, barcone (OBJ dallo STL)
+tools/sintetizza_audio.py    genera musica ed effetti (numpy + ffmpeg)
 tests/                       sim.gd (IA contro IA), shot.gd (screenshot), online_play.gd + firebase_mock.py
 ```
 

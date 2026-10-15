@@ -719,6 +719,7 @@ func _boarding() -> void:
 		else:
 			log_msg("%s abborda il barcone di %s." % [pname(s), D.ware_name(b["w"])])
 		b["riders"][slot] = s
+		fx.emit("board", {"boat": int(o["b"])})
 		just["%d_%d" % [int(o["b"]), slot]] = true
 		spots[id] = -1
 		fx.emit("place", {"seat": s, "boat": int(o["b"]), "slot": slot})
@@ -825,6 +826,7 @@ func _resolve_end() -> void:
 		for k in b["riders"].size():
 			b["riders"][k] = -1
 		log_msg("I pirati saccheggiano il barcone di %s!" % D.ware_name(b["w"]))
+		fx.emit("plunder", {"boat": bi})
 		changed.emit()
 		var cap: int = spots["P0"] if spots["P0"] != -1 else spots["P1"]
 		var r = await decide(cap, {"type": "plunder", "b": bi,
