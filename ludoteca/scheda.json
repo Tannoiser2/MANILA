@@ -1,0 +1,13 @@
+{
+  "titolo": "Manila",
+  "sottotitolo": "contrabbando nel porto",
+  "descrizione": "Aste per la capitaneria, complici sui barconi, pirati e piloti in un porto 3D, contro l'IA o online, con la variante consigliata di BGG.",
+  "online": true,
+  "sezione": "conversione",
+  "ordine": 183,
+  "gioca": "https://tannoiser2.github.io/MANILA/",
+  "bgg": 5005,
+  "generi": [
+    "Gestionali"
+  ]
+}
