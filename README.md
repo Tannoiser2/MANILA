@@ -56,9 +56,10 @@ Dal menu, **GIOCA ONLINE** (anche dalla versione web). Usa lo stesso progetto Fi
 
 **Configurazione Firebase.** Le regole sono in `firebase/database.rules.json`: comprendono quelle di tutti
 gli altri giochi (Ultimo chilometro, Snow Tails, STATUS, World Order, Kingsburg, Churchill, Burning Banners,
-BEAST, Mage Knight, Endeavor, Endeavor: Deep Sea) più la nuova sezione `manila`. Vanno pubblicate nella
-console di Firebase (Realtime Database → Regole) al posto delle precedenti; senza questo passaggio la
-creazione della stanza risponde "Permission denied".
+BEAST, Mage Knight, Endeavor, Endeavor: Deep Sea) più la nuova sezione `manila` e una sezione generica `$game`: qualunque gioco futuro che
+salva le stanze in `<nome>/rooms` con lo stesso schema (host, seats, acts…) funziona senza toccare più le regole.
+Vanno pubblicate nella console di Firebase (Realtime Database → Regole) sostituendo tutto il testo
+(Cmd+A, incolla, Pubblica); senza questo passaggio la creazione della stanza risponde "Permission denied".
 
 **Prove senza Firebase.** `tests/firebase_mock.py` è un finto Firebase locale. Con `MN_DB_URL`,
 `MN_AUTH_URL` e `MN_REFRESH_URL` che puntano lì, `tests/online_play.gd` fa giocare una partita intera a

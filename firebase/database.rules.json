@@ -2,10 +2,6 @@
   "rules": {
     ".read": false,
     ".write": false,
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // ULTIMO CHILOMETRO (Flamme Rouge)
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "rooms": {
       "$code": {
         ".read": "auth != null",
@@ -45,10 +41,6 @@
         }
       }
     },
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // SNOW TAILS
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "snowtails": {
       "rooms": {
         "$code": {
@@ -89,10 +81,6 @@
         }
       }
     },
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // STATUS
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "status": {
       "rooms": {
         "$code": {
@@ -133,10 +121,6 @@
         }
       }
     },
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // WORLD ORDER
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "worldorder": {
       "rooms": {
         "$code": {
@@ -172,10 +156,6 @@
         }
       }
     },
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // KINGSBURG
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "kingsburg": {
       "rooms": {
         "$code": {
@@ -216,10 +196,6 @@
         }
       }
     },
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // CHURCHILL
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "churchill": {
       "rooms": {
         "$code": {
@@ -260,10 +236,6 @@
         }
       }
     },
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // BURNING BANNERS
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "burningbanners": {
       "rooms": {
         "$code": {
@@ -307,10 +279,6 @@
         }
       }
     },
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // BEAST
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "beast": {
       "rooms": {
         "$code": {
@@ -359,10 +327,6 @@
         }
       }
     },
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // MAGE KNIGHT
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "mageknight": {
       "rooms": {
         "$code": {
@@ -414,10 +378,6 @@
         }
       }
     },
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // ENDEAVOR (AGE OF SAIL)
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "endeavor": {
       "rooms": {
         "$code": {
@@ -458,10 +418,6 @@
         }
       }
     },
-
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
-    // ENDEAVOR: DEEP SEA
-    // 🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥🟥
     "endeavordeepsea": {
       "rooms": {
         "$code": {
@@ -502,10 +458,6 @@
         }
       }
     },
-
-    // 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
-    // MANILA
-    // 🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
     "manila": {
       "rooms": {
         "$code": {
@@ -537,6 +489,46 @@
           "acts": {
             "$n": {
               ".write": "auth != null && !data.exists() && newData.exists() && (root.child('manila/rooms/' + $code + '/seats/' + newData.child('s').val() + '/uid').val() === auth.uid || root.child('manila/rooms/' + $code + '/host').val() === auth.uid)",
+              ".validate": "newData.hasChildren(['s', 'k']) && newData.child('k').isString() && newData.child('k').val().length <= 8"
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "$game": {
+      "rooms": {
+        "$code": {
+          ".read": "auth != null",
+          ".write": "auth != null && data.child('host').val() === auth.uid && !newData.exists()",
+          ".validate": "$code.length === 4",
+          "host": {
+            ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
+          },
+          "created": {
+            ".write": "auth != null && !data.exists()"
+          },
+          "status": {
+            ".write": "auth != null && newData.parent().child('host').val() === auth.uid",
+            ".validate": "newData.isString() && newData.val().length <= 12"
+          },
+          "open": {
+            ".write": "auth != null && newData.parent().child('host').val() === auth.uid"
+          },
+          "game": {
+            ".write": "auth != null && newData.parent().child('host').val() === auth.uid"
+          },
+          "seats": {
+            "$i": {
+              ".write": "auth != null && ((!data.exists() && newData.child('uid').val() === auth.uid) || data.child('uid').val() === auth.uid || data.child('away').val() === true || root.child($game + '/rooms/' + $code + '/host').val() === auth.uid || newData.parent().parent().child('host').val() === auth.uid)",
+              ".validate": "newData.hasChildren(['uid', 'name']) && newData.child('name').isString() && newData.child('name').val().length <= 24"
+            }
+          },
+          "acts": {
+            "$n": {
+              ".write": "auth != null && !data.exists() && newData.exists() && (root.child($game + '/rooms/' + $code + '/seats/' + newData.child('s').val() + '/uid').val() === auth.uid || root.child($game + '/rooms/' + $code + '/host').val() === auth.uid)",
               ".validate": "newData.hasChildren(['s', 'k']) && newData.child('k').isString() && newData.child('k').val().length <= 8"
             }
           },
