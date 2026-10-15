@@ -20,7 +20,7 @@ modulo Tabletop Simulator e non vanno distribuite pubblicamente.
 - **Porto in 3D**: il tabellone del modulo TTS, i barconi dal modello `Manila_Boat_Correct.stl` con le
   tessere carico, complici col cappello conico, dadi dei colori delle merci, segnalini del mercato nero.
   Trascina col mouse per ruotare, rotella o pizzico per lo zoom, tasto destro (o Maiusc+trascina) per
-  spostare; i pulsanti ◀ ▶ + − ruotano e zoomano, Vista alterna la vista dal fondo e quella di lato,
+  spostare; i pulsanti < > + − ruotano e zoomano, Vista alterna la vista dal fondo e quella di lato,
   Dall'alto guarda il tabellone in pianta.
   Le caselle in cui si può piazzare un complice si illuminano: basta un clic.
 - **Regole complete** (regolamento italiano 2014): asta per la capitaneria con prestiti, acquisto della

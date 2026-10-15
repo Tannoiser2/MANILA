@@ -152,7 +152,7 @@ func _build_cam() -> void:
 	var hb := HBoxContainer.new()
 	hb.add_theme_constant_override("separation", 4)
 	vb.add_child(hb)
-	for spec in [["◀", "Ruota a sinistra", func(): board.rotate_view(-30)], ["▶", "Ruota a destra", func(): board.rotate_view(30)],
+	for spec in [["<", "Ruota a sinistra", func(): board.rotate_view(-30)], [">", "Ruota a destra", func(): board.rotate_view(30)],
 			["+", "Avvicina", func(): board.zoom(0.85)], ["−", "Allontana", func(): board.zoom(1.18)]]:
 		var b := UI.button(spec[0], 50, 44, 24)
 		b.tooltip_text = spec[1]
