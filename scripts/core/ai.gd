@@ -278,25 +278,48 @@ func default_load(eng: MNEngine, s: int) -> Dictionary:
 
 ## Quanto vale per s comandare la capitaneria in questo viaggio.
 func hm_value(eng: MNEngine, s: int) -> float:
-	var mx := -1e9
-	var tot := 0.0
-	var cnt := 0
+	var sts := []
+	var best := -1e9
 	for cfg in load_configs():
-		var v := _stake(eng, s, cfg)
-		mx = maxf(mx, v)
-		tot += v
-		cnt += 1
-	var base := 3.0 + (mx - tot / cnt)
-	# poter comprare una quota a buon prezzo
-	base += 1.5
-	return base
+		var st := _stake(eng, s, cfg)
+		sts.append(st)
+		best = maxf(best, st + 0.5 * _first_pick(eng, cfg))
+	sts.sort()
+	var tot := 0.0
+	for x in sts:
+		tot += x
+	var mean := tot / sts.size()
+	var low := 0.0
+	var q := maxi(1, sts.size() / 4)
+	for i in q:
+		low += sts[i]
+	low /= q
+	# se vince un altro sceglie per sé: in media una configurazione qualunque, a volte contro di me
+	var other := lerpf(mean, low, 0.35)
+	if level == 0:
+		# Facile: guarda solo le proprie quote
+		return 4.5 + (sts[sts.size() - 1] - mean)
+	var v := best - other
+	# la quota che solo il capitano può comprare (e poi favorire)
+	var buy := 0.0
+	for w in 4:
+		if eng.supply[w] > 0:
+			var g := _share_end_value(eng, w) - eng.share_price(w)
+			# con la capitaneria posso spingere proprio quella merce
+			g += D.delta(eng.market[w]) * 0.6 * _endgame(eng)
+			buy = maxf(buy, g)
+	v += maxf(0.0, buy) * 0.8
+	return maxf(2.0, v)
 
 
 func _bid_cap(eng: MNEngine, s: int) -> int:
 	var v := hm_value(eng, s)
-	var f: float = [0.6, 0.85, 1.0][level]
+	# fattori tarati con centinaia di partite IA contro IA: la capitaneria vale molto
+	# (scelta dei carichi, quota esclusiva, primo complice) e la Difficile la paga di più
+	var f: float = [0.6, 0.45, 0.7][level]
 	var cash: int = eng.players[s]["cash"]
-	var reserve := 8 if level > 0 else 4
+	# chi ha molto denaro può permettersi di spendere: il denaro conta solo quanto rende
+	var reserve := 4 if level == 0 else 8
 	return int(clampf(floorf(v * f), 0.0, maxf(0.0, cash - reserve)))
 
 

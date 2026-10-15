@@ -92,25 +92,36 @@ func _process(delta: float) -> void:
 func _build_env() -> void:
 	var env := WorldEnvironment.new()
 	var e := Environment.new()
-	e.background_mode = Environment.BG_COLOR
-	e.background_color = Color("#06100f")
+	# cielo tropicale
+	var sky := Sky.new()
+	var sm := ProceduralSkyMaterial.new()
+	sm.sky_top_color = Color("#2f86c9")
+	sm.sky_horizon_color = Color("#c5ecf0")
+	sm.ground_horizon_color = Color("#79cfd2")
+	sm.ground_bottom_color = Color("#0d5560")
+	sm.sun_angle_max = 20.0
+	sky.sky_material = sm
+	e.background_mode = Environment.BG_SKY
+	e.sky = sky
 	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	e.ambient_light_color = Color("#9fb7b0")
-	e.ambient_light_energy = 0.25
+	e.ambient_light_color = Color("#b9d8d0")
+	e.ambient_light_energy = 0.28
 	e.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	e.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
+	e.background_energy_multiplier = 0.9
 	env.environment = e
 	add_child(env)
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-52, -28, 0)
-	sun.light_energy = 0.7
-	sun.light_color = Color("#fff3dc")
+	sun.rotation_degrees = Vector3(-50, -32, 0)
+	sun.light_energy = 0.72
+	sun.light_color = Color("#fff0d0")
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 60.0
 	add_child(sun)
 	var fill := DirectionalLight3D.new()
 	fill.rotation_degrees = Vector3(-35, 150, 0)
-	fill.light_energy = 0.3
-	fill.light_color = Color("#a8d8ff")
+	fill.light_energy = 0.28
+	fill.light_color = Color("#a8e0ff")
 	add_child(fill)
 	cam = Camera3D.new()
 	cam.fov = 42.0
@@ -120,26 +131,17 @@ func _build_env() -> void:
 
 
 func _build_board() -> void:
-	# tavolo
-	var table := MeshInstance3D.new()
-	var tm := PlaneMesh.new()
-	tm.size = Vector2(80, 80)
-	table.mesh = tm
-	var tmat := StandardMaterial3D.new()
-	tmat.albedo_color = Color("#2a1c12")
-	tmat.roughness = 0.85
-	table.material_override = tmat
-	table.position.y = -0.16
-	add_child(table)
+	_build_island()
 	# tabellone (spessore con bordo scuro, faccia superiore con l'immagine)
 	var w := D.BOARD_PX.x / 100.0
 	var h := D.BOARD_PX.y / 100.0
 	var body := MeshInstance3D.new()
 	var bm := BoxMesh.new()
-	bm.size = Vector3(w, 0.14, h)
+	bm.size = Vector3(w + 0.3, 0.14, h + 0.3)
 	body.mesh = bm
 	var bmat := StandardMaterial3D.new()
-	bmat.albedo_color = Color("#1a120b")
+	bmat.albedo_color = Color("#5a3519")
+	bmat.roughness = 0.9
 	body.material_override = bmat
 	body.position.y = -0.075
 	add_child(body)
@@ -155,6 +157,122 @@ func _build_board() -> void:
 	top.material_override = mat
 	top.position.y = 0.002
 	add_child(top)
+
+
+const SEA_SHADER := """
+shader_type spatial;
+render_mode specular_schlick_ggx;
+uniform vec3 deep : source_color = vec3(0.01, 0.22, 0.30);
+uniform vec3 shallow : source_color = vec3(0.10, 0.55, 0.56);
+varying vec3 wpos;
+void vertex() {
+	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+void fragment() {
+	float d = length(wpos.xz / vec2(9.5, 14.5));
+	float t = TIME * 0.6;
+	float w = sin(wpos.x * 1.3 + t) * 0.5 + sin(wpos.z * 1.7 - t * 1.3) * 0.5 + sin((wpos.x + wpos.z) * 0.6 + t * 0.7);
+	float shore = clamp(1.6 - d, 0.0, 1.0);
+	vec3 c = mix(deep, shallow, shore * 0.85 + 0.1);
+	float foam = smoothstep(0.92, 1.0, 1.25 - abs(d - 1.12) * 6.0 + w * 0.08);
+	ALBEDO = mix(c + w * 0.015, vec3(0.95, 0.98, 0.96), foam * 0.7);
+	ROUGHNESS = 0.18;
+	METALLIC = 0.0;
+	SPECULAR = 0.35;
+	NORMAL_MAP = normalize(vec3(0.5 + 0.06 * cos(wpos.x * 1.3 + t), 0.5 + 0.06 * cos(wpos.z * 1.7 - t * 1.3), 1.0));
+}
+"""
+
+
+## Isolotto di sabbia nel mare dei Caraibi con qualche palma: il tabellone ci sta sopra.
+func _build_island() -> void:
+	var sea := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(240, 240)
+	pm.subdivide_width = 4
+	pm.subdivide_depth = 4
+	sea.mesh = pm
+	var sh := Shader.new()
+	sh.code = SEA_SHADER
+	var smat := ShaderMaterial.new()
+	smat.shader = sh
+	sea.material_override = smat
+	sea.position.y = -0.55
+	add_child(sea)
+	var island := MeshInstance3D.new()
+	var cm := CylinderMesh.new()
+	cm.top_radius = 1.0
+	cm.bottom_radius = 1.12
+	cm.height = 0.6
+	cm.radial_segments = 48
+	island.mesh = cm
+	island.material_override = _mat(Color("#a88a52"), 1.0)
+	island.scale = Vector3(9.4, 1.0, 14.6)
+	island.position.y = -0.46
+	add_child(island)
+	var rnd := RandomNumberGenerator.new()
+	rnd.seed = 1821
+	for spot in [Vector3(-7.3, -0.16, -9.6), Vector3(7.6, -0.16, -8.4), Vector3(-7.8, -0.16, 6.5), Vector3(7.9, -0.16, 9.8), Vector3(-8.4, -0.16, -1.5)]:
+		var palm := _make_palm(rnd)
+		palm.position = spot
+		palm.rotation.y = rnd.randf() * TAU
+		add_child(palm)
+	for k in 7:
+		var rock := MeshInstance3D.new()
+		var sp := SphereMesh.new()
+		sp.radius = 0.5
+		sp.height = 0.6
+		rock.mesh = sp
+		rock.material_override = _mat(Color("#7d7468"), 0.9)
+		var ang := rnd.randf() * TAU
+		rock.position = Vector3(cos(ang) * 9.6, -0.3, sin(ang) * 15.0)
+		rock.scale = Vector3(rnd.randf_range(0.6, 1.4), rnd.randf_range(0.4, 0.8), rnd.randf_range(0.6, 1.4))
+		add_child(rock)
+
+
+func _make_palm(rnd: RandomNumberGenerator) -> Node3D:
+	var root := Node3D.new()
+	var trunk_m := _mat(Color("#8a6a45"), 0.95)
+	var leaf_m := _mat(Color("#1f6b2c"), 0.9).duplicate()
+	leaf_m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var lean := Vector3(rnd.randf_range(-0.25, 0.25), 1.0, rnd.randf_range(-0.25, 0.25)).normalized()
+	var p := Vector3.ZERO
+	var segs := 7
+	for i in segs:
+		var seg := MeshInstance3D.new()
+		var c := CylinderMesh.new()
+		c.top_radius = 0.13 - i * 0.008
+		c.bottom_radius = 0.16 - i * 0.008
+		c.height = 0.62
+		seg.mesh = c
+		seg.material_override = trunk_m
+		var dir := (lean + Vector3(lean.x, 0, lean.z) * i * 0.12).normalized()
+		seg.position = p + dir * 0.31
+		seg.basis = Basis(Vector3.UP.cross(dir).normalized() if Vector3.UP.cross(dir).length() > 0.001 else Vector3.RIGHT, Vector3.UP.angle_to(dir))
+		root.add_child(seg)
+		p += dir * 0.58
+	for k in 8:
+		var leaf := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		bm.size = Vector3(0.42, 0.03, 1.9)
+		leaf.mesh = bm
+		leaf.material_override = leaf_m
+		var holder := Node3D.new()
+		holder.position = p
+		holder.rotation = Vector3(0, k * TAU / 8 + rnd.randf_range(-0.2, 0.2), 0)
+		leaf.position = Vector3(0, -0.25, 0.85)
+		leaf.rotation = Vector3(deg_to_rad(rnd.randf_range(24, 42)), 0, 0)
+		holder.add_child(leaf)
+		root.add_child(holder)
+	var nut := MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 0.16
+	sm.height = 0.3
+	nut.mesh = sm
+	nut.material_override = _mat(Color("#4a3018"), 0.8)
+	nut.position = p + Vector3(0, -0.15, 0)
+	root.add_child(nut)
+	return root
 
 
 func _mat(c: Color, rough := 0.55) -> StandardMaterial3D:

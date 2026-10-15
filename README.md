@@ -14,10 +14,14 @@ modulo Tabletop Simulator e non vanno distribuite pubblicamente.
 - **Da 3 a 5 contrabbandieri** (Nero, Arancione, Giallo, Blu, Rosso), ognuno Umano o IA. Con più
   umani sullo stesso dispositivo si gioca a turno; le quote di chi gioca si vedono solo quando decide e
   l'asta a mano chiusa passa da una schermata "tocca a…".
+- **Grafica "caraibica"**: pergamene dai bordi strappati, assi di legno, mare turchese e corallo, titoli in
+  Pirata One e testo in Alegreya Sans; il tabellone è un isolotto di sabbia con le palme in mezzo al mare,
+  sotto un cielo tropicale.
 - **Porto in 3D**: il tabellone del modulo TTS, i barconi dal modello `Manila_Boat_Correct.stl` con le
   tessere carico, complici col cappello conico, dadi dei colori delle merci, segnalini del mercato nero.
-  Trascina per ruotare, rotella o pizzico per lo zoom, tasto destro (o Maiusc+trascina) per spostare;
-  VISTA alterna la vista dal fondo e quella di lato, DALL'ALTO guarda il tabellone in pianta.
+  Trascina col mouse per ruotare, rotella o pizzico per lo zoom, tasto destro (o Maiusc+trascina) per
+  spostare; i pulsanti ◀ ▶ + − ruotano e zoomano, Vista alterna la vista dal fondo e quella di lato,
+  Dall'alto guarda il tabellone in pianta.
   Le caselle in cui si può piazzare un complice si illuminano: basta un clic.
 - **Regole complete** (regolamento italiano 2014): asta per la capitaneria con prestiti, acquisto della
   quota, carico e partenze a somma 9, giri di piazzamento (4 in tre giocatori), abbordaggio dopo il
@@ -32,9 +36,12 @@ modulo Tabletop Simulator e non vanno distribuite pubblicamente.
     proprio molo/cantiere, casella Malattia; attiva anche i pirati forti.
 - **IA** su tre livelli. Calcola in modo esatto, per ogni barcone e per i tiri che restano, la probabilità
   di arrivare, di fermarsi sul 13 o di naufragare, e valuta ogni mossa come guadagno atteso (carichi,
-  moli, cantieri, assicurazione, pirati, aumento delle proprie quote). La Difficile considera anche chi
-  potrebbe salire dopo sul barcone e simula l'azione dei piloti; nelle prove vince circa 7 partite su 10
-  contro tre IA Normali. Non sbircia le quote coperte degli avversari.
+  moli, cantieri, assicurazione, pirati, aumento delle proprie quote). La capitaneria si valuta per
+  quello che rende davvero (miglior carico per sé contro quello che sceglierebbe un avversario, quota
+  esclusiva da comprare e spingere, primo complice): i fattori d'offerta sono tarati con centinaia di
+  partite IA contro IA. La Difficile considera anche chi potrebbe salire dopo sul barcone e simula
+  l'azione dei piloti; vince circa metà delle partite contro tre IA Normali, che a loro volta battono
+  nettamente le Facili. Non sbircia le quote coperte degli avversari.
 - **Aiuti**: sopra ogni barcone la probabilità di arrivare e di fermarsi sul 13; in verde la mossa
   consigliata dall'IA (si spegne con *Niente consigli dell'IA*); riepilogo a fine viaggio, cronaca,
   diario completo e regole in breve.

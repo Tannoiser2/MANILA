@@ -93,6 +93,31 @@ func _run() -> void:
 			taken[key] = true
 			await wait(45)
 			await shot(key)
+			if OS.get_environment("MN_QUICK") != "" and req["type"] == "place":
+				# trascinamento col mouse sul porto: la vista deve ruotare
+				var y0: float = g.board._yaw_t
+				var ev := InputEventMouseButton.new()
+				ev.button_index = MOUSE_BUTTON_LEFT
+				ev.pressed = true
+				ev.position = Vector2(960, 450)
+				Input.parse_input_event(ev)
+				for k in 10:
+					var mm := InputEventMouseMotion.new()
+					mm.position = Vector2(960 + k * 20, 450)
+					mm.relative = Vector2(20, 0)
+					mm.button_mask = MOUSE_BUTTON_MASK_LEFT
+					Input.parse_input_event(mm)
+					await process_frame
+				var up := InputEventMouseButton.new()
+				up.button_index = MOUSE_BUTTON_LEFT
+				up.pressed = false
+				up.position = Vector2(1160, 450)
+				Input.parse_input_event(up)
+				await wait(40)
+				print("ROTAZIONE yaw ", y0, " -> ", g.board._yaw_t)
+				await shot("trascinato")
+				quit()
+				return
 			if req["type"] == "place" and not taken.has("orbit"):
 				taken["orbit"] = true
 				g.board.rotate_view(60)

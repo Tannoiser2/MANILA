@@ -1,7 +1,8 @@
 extends Control
-## Menu principale: copertina, logo, i cinque colori (Umano / IA / Assente), livello IA e varianti.
+## Menu principale: il dipinto della scatola, la ciurma su una pergamena (Umano / IA / Assente),
+## livello e velocità dell'IA, varianti, gioco online.
 
-const MODES := ["UMANO", "IA", "ASSENTE"]
+const MODES := ["Umano", "IA", "Assente"]
 const D = preload("res://scripts/data/mn_data.gd")
 
 var main
@@ -17,8 +18,10 @@ const MOD_LIST := [
 	["bgg", "Variante consigliata di BGG", "Asta a mano chiusa (offerte segrete rivelate insieme; a parità vince il primo a sinistra del capitano uscente) e giro di piazzamento dopo il primo tiro in senso antiorario, partendo sempre dal capitano del porto."],
 	["pirates", "Pirati forti", "Regola opzionale del regolamento: all'abbordaggio, se non ci sono posti liberi, il pirata può scalzare un complice."],
 	["five", "Scelte extra per 5 giocatori", "Solo in 5 (variante BGG): piloti scontati nell'ultimo giro (1 e 3), scommessa 1-3 pesos con un dado su un proprio molo/cantiere (vinci il doppio), casella Malattia gratuita (1 peso). Attiva anche i pirati forti."],
-	["nohints", "Niente consigli dell'IA", "Non evidenzia in verde la mossa che l'IA consiglia."],
+	["nohints", "Niente consigli dell'IA", "Non evidenzia la mossa che l'IA consiglia."],
 ]
+
+const NICK := ["Il Corvo", "La Volpe d'Oro", "Sole di Luzon", "Onda Blu", "Corallo Rosso"]
 
 
 func _ready() -> void:
@@ -28,104 +31,131 @@ func _ready() -> void:
 		level = main.menu_state["level"]
 		speed = main.menu_state["speed"]
 		mods = main.menu_state.get("mods", {}).duplicate()
-	var bg := TextureRect.new()
-	bg.texture = UI.tex("res://assets/ui/cover.jpg")
-	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	bg.size = Vector2(1920, 1080)
-	bg.modulate = Color(0.45, 0.5, 0.5)
-	add_child(bg)
-	var shade := TextureRect.new()
+	# mare turchese dietro, dipinto della scatola a destra
+	var sea_bg := TextureRect.new()
 	var grad := GradientTexture2D.new()
 	var g := Gradient.new()
-	g.set_color(0, Color(0.02, 0.06, 0.06, 0.25))
-	g.set_color(1, Color(0.02, 0.06, 0.06, 0.93))
+	g.set_color(0, Color("#0d6e74"))
+	g.set_color(1, Color("#06333a"))
 	grad.gradient = g
 	grad.fill_from = Vector2(0, 0)
-	grad.fill_to = Vector2(0, 1)
-	shade.texture = grad
-	shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	shade.stretch_mode = TextureRect.STRETCH_SCALE
-	shade.size = Vector2(1920, 1080)
-	add_child(shade)
+	grad.fill_to = Vector2(0.4, 1)
+	sea_bg.texture = grad
+	sea_bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	sea_bg.stretch_mode = TextureRect.STRETCH_SCALE
+	sea_bg.size = Vector2(1920, 1080)
+	add_child(sea_bg)
+	var art := TextureRect.new()
+	var at := AtlasTexture.new()
+	at.atlas = UI.tex("res://assets/ui/cover.jpg")
+	at.region = Rect2(40, 250, 840, 630)
+	art.texture = at
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	art.position = Vector2(820, 0)
+	art.size = Vector2(1100, 1080)
+	add_child(art)
+	var fade := TextureRect.new()
+	var fg := GradientTexture2D.new()
+	var g2 := Gradient.new()
+	g2.set_color(0, Color(0.03, 0.25, 0.27, 1.0))
+	g2.set_color(1, Color(0.03, 0.25, 0.27, 0.0))
+	fg.gradient = g2
+	fg.fill_from = Vector2(0, 0)
+	fg.fill_to = Vector2(1, 0)
+	fade.texture = fg
+	fade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fade.stretch_mode = TextureRect.STRETCH_SCALE
+	fade.position = Vector2(820, 0)
+	fade.size = Vector2(300, 1080)
+	add_child(fade)
 
-	var logo := TextureRect.new()
-	logo.texture = UI.tex("res://assets/ui/logo.jpg")
-	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	logo.size = Vector2(780, 212)
-	logo.position = Vector2(570, 24)
+	var logo := UI.icon_rect(UI.tex("res://assets/ui/logo.png"), Vector2(640, 180))
+	logo.position = Vector2(80, 14)
 	add_child(logo)
+	var tag := UI.label("Contrabbando, pirati e pesos nel porto più losco delle Indie", 24, UI.SAND, UI.font_italic)
+	tag.position = Vector2(96, 186)
+	add_child(tag)
 
-	var head := UI.title("NUOVA PARTITA", 40)
-	head.position = Vector2(62, 262)
-	add_child(head)
-	var sub := UI.label("Scegli chi guida ogni banda di contrabbandieri (da 3 a 5). Il primo a offrire all'asta è sorteggiato.", 24, Color("#d8d0c0"))
-	sub.position = Vector2(64, 316)
-	add_child(sub)
-
+	# pergamena della ciurma
+	var scroll := PanelContainer.new()
+	scroll.add_theme_stylebox_override("panel", UI.paper(false, 30))
+	scroll.position = Vector2(50, 236)
+	scroll.custom_minimum_size = Vector2(800, 0)
+	add_child(scroll)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 6)
+	scroll.add_child(vb)
+	var hh := HBoxContainer.new()
+	hh.add_child(UI.title("La ciurma", 44))
+	var sub := UI.label("   da 3 a 5 bande di contrabbandieri", 20, UI.INK2, UI.font_italic)
+	sub.size_flags_vertical = Control.SIZE_SHRINK_END
+	hh.add_child(sub)
+	vb.add_child(hh)
 	for c in D.COLORS:
-		var i: int = c["id"]
-		_make_tile(c, Vector2(62 + i * 364, 370))
-
-	var box := PanelContainer.new()
-	box.add_theme_stylebox_override("panel", UI.panel_style(Color("#0d0b08dd"), Color("#4a3e28"), 1, 8))
-	box.position = Vector2(62, 690)
-	box.custom_minimum_size = Vector2(1100, 0)
-	add_child(box)
-	var ov := VBoxContainer.new()
-	ov.add_theme_constant_override("separation", 12)
-	box.add_child(ov)
-	ov.add_child(_segmented("Livello IA", ["Facile", "Normale", "Difficile"], level, func(k): level = k))
-	ov.add_child(_segmented("Velocità IA", ["Lenta", "Normale", "Veloce", "Istantanea"], speed, func(k): speed = k))
+		vb.add_child(_crew_row(c))
+	var sep := HSeparator.new()
+	vb.add_child(sep)
+	vb.add_child(_segmented("Astuzia dell'IA", ["Facile", "Normale", "Difficile"], level, func(k): level = k))
+	vb.add_child(_segmented("Velocità dell'IA", ["Lenta", "Normale", "Veloce", "Subito"], speed, func(k): speed = k))
 	var mrow := HBoxContainer.new()
 	mrow.add_theme_constant_override("separation", 12)
-	var ml := UI.label("Varianti", 28, Color.WHITE, UI.font_bold)
+	var ml := UI.label("Varianti", 24, UI.INK, UI.font_bold)
 	ml.custom_minimum_size = Vector2(190, 0)
 	mrow.add_child(ml)
-	var mb := UI.button("VARIANTI…", 250, 50, 22)
+	var mb := UI.button("Scegli…", 150, 46, 21)
 	mb.pressed.connect(_mods_panel)
 	mrow.add_child(mb)
-	mods_lbl = UI.label("", 21, Color("#cfc5b0"))
-	mods_lbl.custom_minimum_size = Vector2(560, 0)
+	mods_lbl = UI.label("", 19, UI.INK2, UI.font_italic)
+	mods_lbl.custom_minimum_size = Vector2(380, 0)
 	mods_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	mrow.add_child(mods_lbl)
-	ov.add_child(mrow)
+	vb.add_child(mrow)
 	_mods_text()
-
-	msg = UI.label("", 26, UI.RED, UI.font_bold)
-	msg.position = Vector2(62, 1000)
-	add_child(msg)
 
 	var btns := HBoxContainer.new()
 	btns.add_theme_constant_override("separation", 18)
-	btns.position = Vector2(62, 912)
+	btns.position = Vector2(60, 940)
 	add_child(btns)
-	var b_start := _big_button("INIZIA PARTITA", 420, true)
+	var b_start := _big_button("Salpa!", 360, true)
 	b_start.pressed.connect(_on_start)
 	btns.add_child(b_start)
-	var b_rules := _big_button("REGOLE", 240)
+	var b_rules := _big_button("Regole", 220)
 	b_rules.pressed.connect(func():
 		_store()
 		main.show_rules())
 	btns.add_child(b_rules)
 	if not OS.has_feature("web"):
-		var b_quit := _big_button("ESCI", 200)
+		var b_quit := _big_button("Esci", 170)
 		b_quit.pressed.connect(func(): get_tree().quit())
 		btns.add_child(b_quit)
 
-	var b_online := _big_button("GIOCA ONLINE", 420)
-	b_online.position = Vector2(1438, 912)
+	msg = UI.label("", 24, Color("#ffb4a0"), UI.font_bold)
+	msg.position = Vector2(64, 1030)
+	add_child(msg)
+
+	# gioco online: cartello sul dipinto
+	var on_box := PanelContainer.new()
+	on_box.add_theme_stylebox_override("panel", UI.paper(true, 24))
+	on_box.position = Vector2(1430, 780)
+	on_box.custom_minimum_size = Vector2(440, 0)
+	add_child(on_box)
+	var ovb := VBoxContainer.new()
+	ovb.add_theme_constant_override("separation", 8)
+	on_box.add_child(ovb)
+	ovb.add_child(UI.title("Con gli amici", 34))
+	var on_note := UI.label("Ognuno dal suo dispositivo: crea una stanza e condividi il codice.", 20, UI.INK2)
+	on_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	on_note.custom_minimum_size = Vector2(390, 0)
+	ovb.add_child(on_note)
+	var b_online := UI.sea(_big_button("Gioca online", 390))
 	b_online.pressed.connect(_online_panel)
-	add_child(b_online)
-	var on_note := UI.label("Con gli amici, ognuno dal suo dispositivo:\ncrea una stanza e condividi il codice.", 21, Color("#bdb5a5"))
-	on_note.position = Vector2(1440, 840)
-	add_child(on_note)
+	ovb.add_child(b_online)
 	if not main.lobby.is_empty():
 		_online_panel.call_deferred()
 
-	var credits := UI.label("Adattamento digitale non ufficiale per uso personale · Manila di Franz-Benno Delonge · illustrazioni di Victor Boden · © Zoch Verlag · F11 schermo intero", 18, Color("#8a8478"))
-	credits.position = Vector2(62, 1040)
+	var credits := UI.label("Adattamento digitale non ufficiale per uso personale · Manila di Franz-Benno Delonge · illustrazioni di Victor Boden · © Zoch Verlag · F11 schermo intero", 16, Color("#cfe6e2"))
+	credits.position = Vector2(830, 1050)
 	add_child(credits)
 	_refresh_tiles()
 
@@ -138,8 +168,8 @@ func _mods_text() -> void:
 	var names := []
 	for m in MOD_LIST:
 		if mods.get(m[0], false):
-			names.append(m[1].strip_edges().replace("    ", ""))
-	mods_lbl.text = "Regole base." if names.is_empty() else ", ".join(names)
+			names.append(m[1])
+	mods_lbl.text = "Regole base del regolamento." if names.is_empty() else ", ".join(names) + "."
 
 
 func _mods_panel() -> void:
@@ -148,54 +178,48 @@ func _mods_panel() -> void:
 	layer.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(layer)
 	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.75)
+	shade.color = Color(0.01, 0.12, 0.13, 0.75)
 	shade.size = layer.size
 	layer.add_child(shade)
 	var box := PanelContainer.new()
-	box.add_theme_stylebox_override("panel", UI.panel_style(Color("#15120df4"), UI.GOLD, 2, 8))
-	box.position = Vector2(420, 200)
-	box.custom_minimum_size = Vector2(1080, 0)
+	box.add_theme_stylebox_override("panel", UI.paper(false, 34))
+	box.position = Vector2(400, 190)
+	box.custom_minimum_size = Vector2(1120, 0)
 	layer.add_child(box)
 	var vb := VBoxContainer.new()
-	vb.add_theme_constant_override("separation", 10)
+	vb.add_theme_constant_override("separation", 12)
 	box.add_child(vb)
-	vb.add_child(UI.title("VARIANTI", 40))
-	vb.add_child(UI.label("Si possono combinare. Il foglio della variante BGG le raccomanda tutte (le scelte extra solo in 5).", 22, Color("#cccccc")))
+	vb.add_child(UI.title("Varianti", 48))
+	vb.add_child(UI.label("Si possono combinare. Il foglio della variante BGG le raccomanda tutte (le scelte extra solo in 5).", 21, UI.INK2, UI.font_italic))
 	var checks := {}
 	for m in MOD_LIST:
 		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
 		var c := CheckBox.new()
 		c.text = m[1]
 		c.button_pressed = mods.get(m[0], false)
-		c.custom_minimum_size = Vector2(440, 0)
-		c.add_theme_font_size_override("font_size", 24)
+		c.custom_minimum_size = Vector2(380, 0)
+		c.add_theme_font_size_override("font_size", 23)
 		row.add_child(c)
-		var d := UI.label(m[2], 19, Color("#bdb5a5"))
+		var d := UI.label(m[2], 19, UI.INK2)
 		d.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		d.custom_minimum_size = Vector2(600, 0)
+		d.custom_minimum_size = Vector2(660, 0)
 		row.add_child(d)
 		vb.add_child(row)
 		checks[m[0]] = c
-	var fix := func():
-		pass
-	for k in checks:
-		checks[k].toggled.connect(func(_on): fix.call())
-	fix.call()
 	var hb := HBoxContainer.new()
 	hb.add_theme_constant_override("separation", 14)
-	var all := UI.button("TUTTI", 160, 56, 24)
+	var all := UI.button("Tutte", 150, 54, 23)
 	all.pressed.connect(func():
 		for k in ["bgg", "pirates", "five"]:
-			checks[k].button_pressed = true
-		fix.call())
+			checks[k].button_pressed = true)
 	hb.add_child(all)
-	var none := UI.button("NESSUNO", 180, 56, 24)
+	var none := UI.button("Nessuna", 170, 54, 23)
 	none.pressed.connect(func():
 		for k in checks:
-			checks[k].button_pressed = false
-		fix.call())
+			checks[k].button_pressed = false)
 	hb.add_child(none)
-	var ok := UI.primary(UI.button("FATTO", 200, 56, 24))
+	var ok := UI.primary(UI.button("Fatto", 190, 54, 23))
 	ok.pressed.connect(func():
 		mods = {}
 		for k in checks:
@@ -208,84 +232,70 @@ func _mods_panel() -> void:
 	vb.add_child(hb)
 
 
-func _make_tile(c: Dictionary, pos: Vector2) -> void:
+func _crew_row(c: Dictionary) -> Control:
 	var i: int = c["id"]
-	var root := Control.new()
-	root.position = pos
-	root.size = Vector2(340, 300)
-	add_child(root)
-	var frame := Panel.new()
-	frame.size = root.size
-	root.add_child(frame)
-	var coat := UI.icon_rect(UI.pawn(i), Vector2(150, 150))
-	coat.position = Vector2(95, 14)
-	root.add_child(coat)
-	var nm := UI.title("%s" % c["name"].to_upper(), 30, c["light"])
-	nm.position = Vector2(0, 172)
-	nm.size = Vector2(340, 40)
-	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	root.add_child(nm)
-	var bar := HBoxContainer.new()
-	bar.position = Vector2(8, 232)
-	bar.size = Vector2(324, 56)
-	bar.add_theme_constant_override("separation", 4)
-	root.add_child(bar)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	var pw := UI.icon_rect(UI.pawn(i), Vector2(58, 58))
+	pw.mouse_filter = Control.MOUSE_FILTER_STOP
+	pw.gui_input.connect(func(ev):
+		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+			seat_mode[i] = (seat_mode[i] + 1) % 3
+			_refresh_tiles())
+	row.add_child(pw)
+	var nv := VBoxContainer.new()
+	nv.add_theme_constant_override("separation", -6)
+	nv.custom_minimum_size = Vector2(250, 0)
+	var nm := UI.title(c["name"], 32, c["color"].darkened(0.15) if i != 2 else Color("#a07d00"))
+	nv.add_child(nm)
+	nv.add_child(UI.label(NICK[i], 18, UI.INK2, UI.font_italic))
+	row.add_child(nv)
 	var buttons := []
 	for k in range(3):
-		var b := Button.new()
-		b.text = MODES[k]
-		b.custom_minimum_size = Vector2(105, 56)
-		b.add_theme_font_size_override("font_size", 22)
+		var b := UI.button(MODES[k], 140, 50, 21)
 		b.pressed.connect(func():
 			seat_mode[i] = k
 			msg.text = ""
 			_refresh_tiles())
-		bar.add_child(b)
+		row.add_child(b)
 		buttons.append(b)
-	tiles[i] = {"frame": frame, "coat": coat, "buttons": buttons, "color": c["light"]}
-	coat.mouse_filter = Control.MOUSE_FILTER_STOP
-	coat.gui_input.connect(func(ev):
-		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
-			seat_mode[i] = (seat_mode[i] + 1) % 3
-			_refresh_tiles())
+	tiles[i] = {"pawn": pw, "buttons": buttons, "name": nm}
+	return row
 
 
 func _refresh_tiles() -> void:
 	for i in range(5):
 		var t: Dictionary = tiles[i]
 		var m: int = seat_mode[i]
-		var active := m != 2
-		t["coat"].modulate = Color.WHITE if active else Color(0.3, 0.3, 0.3)
-		t["frame"].add_theme_stylebox_override("panel", UI.panel_style(Color("#0c0a08e6"), t["color"] if active else Color("#3a3530"), 3 if active else 1, 8))
+		t["pawn"].modulate = Color.WHITE if m != 2 else Color(1, 1, 1, 0.3)
+		t["name"].modulate = Color.WHITE if m != 2 else Color(1, 1, 1, 0.45)
 		for k in range(3):
 			var b: Button = t["buttons"][k]
-			var sel := k == m
-			b.add_theme_stylebox_override("normal", UI.panel_style(UI.GOLD if sel else Color("#1c1812"), UI.GOLD if sel else Color("#4a4236"), 2, 4))
-			b.add_theme_stylebox_override("hover", UI.panel_style(UI.GOLD if sel else Color("#3a3020"), UI.GOLD, 2, 4))
-			b.add_theme_color_override("font_color", UI.DARK if sel else Color("#dddddd"))
-			b.add_theme_color_override("font_hover_color", UI.DARK if sel else UI.GOLD)
+			if k == m:
+				UI.selected(b, "coral" if k == 0 else ("sea" if k == 1 else "wood_dark"))
+			else:
+				b.add_theme_stylebox_override("normal", UI.plank("wood"))
+				b.add_theme_stylebox_override("hover", UI.plank("wood_hover"))
 
 
 func _segmented(label_text: String, items: Array, cur: int, cb: Callable) -> HBoxContainer:
 	var hb := HBoxContainer.new()
 	hb.add_theme_constant_override("separation", 6)
-	var l := UI.label(label_text, 28, Color.WHITE, UI.font_bold)
+	var l := UI.label(label_text, 24, UI.INK, UI.font_bold)
 	l.custom_minimum_size = Vector2(190, 0)
 	hb.add_child(l)
 	var btns := []
 	for k in range(items.size()):
-		var b := Button.new()
-		b.text = items[k]
-		b.custom_minimum_size = Vector2(200, 50)
-		b.add_theme_font_size_override("font_size", 24)
+		var b := UI.button(items[k], 130, 46, 21)
 		hb.add_child(b)
 		btns.append(b)
 	var paint := func(sel: int):
 		for k in range(btns.size()):
-			var on: bool = k == sel
-			btns[k].add_theme_stylebox_override("normal", UI.panel_style(UI.GOLD if on else Color("#1c1812"), UI.GOLD if on else Color("#4a4236"), 2, 4))
-			btns[k].add_theme_color_override("font_color", UI.DARK if on else Color("#dddddd"))
-			btns[k].add_theme_color_override("font_hover_color", UI.DARK if on else UI.GOLD)
+			if k == sel:
+				UI.selected(btns[k], "sea")
+			else:
+				btns[k].add_theme_stylebox_override("normal", UI.plank("wood"))
+				btns[k].add_theme_stylebox_override("hover", UI.plank("wood_hover"))
 	for k in range(btns.size()):
 		btns[k].pressed.connect(func():
 			cb.call(k)
@@ -297,9 +307,9 @@ func _segmented(label_text: String, items: Array, cur: int, cb: Callable) -> HBo
 func _big_button(text: String, w: float, primary := false) -> Button:
 	var b := Button.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(w, 82)
+	b.custom_minimum_size = Vector2(w, 76)
 	b.add_theme_font_override("font", UI.font_title)
-	b.add_theme_font_size_override("font_size", 34)
+	b.add_theme_font_size_override("font_size", 40)
 	if primary:
 		UI.primary(b)
 	return b
@@ -347,19 +357,19 @@ func _online_panel() -> void:
 	on_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(on_panel)
 	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.75)
+	shade.color = Color(0.01, 0.12, 0.13, 0.78)
 	shade.size = on_panel.size
 	on_panel.add_child(shade)
 	var box := PanelContainer.new()
-	box.add_theme_stylebox_override("panel", UI.panel_style(Color("#15120df4"), UI.GOLD, 2, 8))
+	box.add_theme_stylebox_override("panel", UI.paper(false, 34))
 	box.position = Vector2(560, 130)
 	box.custom_minimum_size = Vector2(800, 0)
 	on_panel.add_child(box)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 16)
 	box.add_child(vb)
-	vb.add_child(UI.title("GIOCA ONLINE", 46))
-	var info := UI.label("Chi crea la stanza sceglie prima nel menu colori, varianti e livello dell'IA: i colori su UMANO diventano i posti per gli amici (il primo è il suo). Gli amici entrano con il codice. I posti rimasti liberi li gioca l'IA.", 22, Color("#cccccc"))
+	vb.add_child(UI.title("Gioca online", 52))
+	var info := UI.label("Chi crea la stanza sceglie prima nel menu colori, varianti e livello dell'IA: i colori su Umano diventano i posti per gli amici (il primo è il suo). Gli amici entrano con il codice. I posti rimasti liberi li gioca l'IA.", 21, UI.INK2)
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	info.custom_minimum_size = Vector2(760, 0)
 	vb.add_child(info)
@@ -368,7 +378,8 @@ func _online_panel() -> void:
 	on_name.text = str(ses.get("name", ""))
 	vb.add_child(on_name)
 	var b_create := Button.new()
-	b_create.text = "CREA UNA STANZA"
+	b_create.text = "Crea una stanza"
+	UI.sea(b_create)
 	b_create.custom_minimum_size = Vector2(0, 60)
 	b_create.add_theme_font_size_override("font_size", 28)
 	b_create.pressed.connect(_online_create)
@@ -382,23 +393,24 @@ func _online_panel() -> void:
 		on_code.caret_column = t.length())
 	row.add_child(on_code)
 	var b_join := Button.new()
-	b_join.text = "ENTRA"
+	b_join.text = "Entra"
+	UI.sea(b_join)
 	b_join.custom_minimum_size = Vector2(200, 60)
 	b_join.add_theme_font_size_override("font_size", 28)
 	b_join.pressed.connect(_online_join)
 	row.add_child(b_join)
 	vb.add_child(row)
-	on_lbl = UI.label("", 24, Color.WHITE)
+	on_lbl = UI.label("", 23, UI.INK)
 	on_lbl.custom_minimum_size = Vector2(760, 120)
 	on_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vb.add_child(on_lbl)
 	var row2 := HBoxContainer.new()
 	row2.add_theme_constant_override("separation", 12)
-	on_start = _big_button("INIZIA ONLINE", 420, true)
+	on_start = _big_button("Si salpa!", 360, true)
 	on_start.pressed.connect(_online_start)
 	on_start.visible = main.lobby.get("role", "") == "host"
 	row2.add_child(on_start)
-	var b_close := _big_button("INDIETRO", 300)
+	var b_close := _big_button("Indietro", 260)
 	b_close.pressed.connect(func():
 		on_panel.queue_free())
 	row2.add_child(b_close)
@@ -408,7 +420,7 @@ func _online_panel() -> void:
 		on_lbl.text = "Stanza %s…" % main.lobby["code"]
 	elif str(ses.get("room", "")) != "":
 		on_code.text = str(ses["room"])
-		on_lbl.text = "Eri nella stanza %s: premi ENTRA per rientrare." % ses["room"]
+		on_lbl.text = "Eri nella stanza %s: premi Entra per rientrare." % ses["room"]
 
 
 func _line(ph: String, maxlen: int) -> LineEdit:
@@ -452,7 +464,7 @@ func _online_create() -> void:
 		if not list[i]["ai"]:
 			seats.append(i)
 	if list.size() < 3 or seats.size() < 2:
-		_say("Servono almeno 3 colori in gioco, di cui almeno due su UMANO: il primo è il tuo, gli altri sono i posti per gli amici.")
+		_say("Servono almeno 3 colori in gioco, di cui almeno due su Umano: il primo è il tuo, gli altri sono i posti per gli amici.")
 		return
 	_store()
 	_say("Creo la stanza…")
@@ -510,7 +522,7 @@ func _lobby_poll(code: String) -> void:
 			main.lobby = {}
 			return
 		if main.lobby["role"] == "host":
-			_say("Stanza [ %s ]: dai il codice ai tuoi amici.\nPosti: %s.\nQuando ci siete tutti premi INIZIA ONLINE: i posti liberi li gioca l'IA." % [code, _seats_text(room)])
+			_say("Stanza [ %s ]: dai il codice ai tuoi amici.\nPosti: %s.\nQuando ci siete tutti premi Si salpa!: i posti liberi li gioca l'IA." % [code, _seats_text(room)])
 		else:
 			if room.get("status", "") == "playing" and room.has("game"):
 				_begin(room["game"], false)

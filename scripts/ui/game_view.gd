@@ -67,6 +67,7 @@ func _ready() -> void:
 	board.target_hovered.connect(_on_hover)
 
 	_build_top()
+	_build_cam()
 	_build_left()
 	_build_right()
 	_build_action()
@@ -75,7 +76,7 @@ func _ready() -> void:
 	modal.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(modal)
 	tip = PanelContainer.new()
-	tip.add_theme_stylebox_override("panel", UI.panel_style(Color("#06181aee"), UI.GOLD, 1, 6))
+	tip.add_theme_stylebox_override("panel", UI.paper(false, 14))
 	tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tip_lbl = UI.label("", 20)
 	tip.add_child(tip_lbl)
@@ -104,7 +105,7 @@ func _exit_tree() -> void:
 
 func _panel(pos: Vector2, sz: Vector2, alpha := 0.86) -> PanelContainer:
 	var p := PanelContainer.new()
-	p.add_theme_stylebox_override("panel", UI.panel_style(Color(0.03, 0.09, 0.09, alpha), Color("#2f5d57"), 1, 8))
+	p.add_theme_stylebox_override("panel", UI.paper(alpha < 0.85, 20))
 	p.position = pos
 	p.size = sz
 	p.custom_minimum_size = sz
@@ -114,7 +115,12 @@ func _panel(pos: Vector2, sz: Vector2, alpha := 0.86) -> PanelContainer:
 
 
 func _build_top() -> void:
-	var p := _panel(Vector2(LX + LW + 10, 8), Vector2(RX - LX - LW - 20, 70), 0.8)
+	var p := PanelContainer.new()
+	p.add_theme_stylebox_override("panel", UI.plank("wood_dark", 14))
+	p.position = Vector2(LX + LW + 10, 8)
+	p.custom_minimum_size = Vector2(RX - LX - LW - 20, 72)
+	p.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(p)
 	var hb := HBoxContainer.new()
 	hb.add_theme_constant_override("separation", 10)
 	p.add_child(hb)
@@ -122,16 +128,46 @@ func _build_top() -> void:
 	vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vb.add_theme_constant_override("separation", 0)
 	hb.add_child(vb)
-	top_lbl = UI.title("MANILA", 26)
+	top_lbl = UI.title("Manila", 34, UI.LIGHT)
 	vb.add_child(top_lbl)
-	sub_lbl = UI.label("", 20, Color("#cfe3dc"))
+	sub_lbl = UI.label("", 19, Color("#f3dfb8"))
 	vb.add_child(sub_lbl)
-	for spec in [["VISTA", func(): board.cycle_view()], ["DALL'ALTO", func(): board.reset_view(true)],
-			["REGOLE", _show_rules_popup], ["DIARIO", _show_log], ["MENU", _ask_quit]]:
-		var b := UI.button(spec[0], 0, 50, 20)
-		b.custom_minimum_size.x = 96 if spec[0] != "DALL'ALTO" else 124
+	for spec in [["Regole", _show_rules_popup], ["Diario", _show_log], ["Menu", _ask_quit]]:
+		var b := UI.button(spec[0], 0, 48, 21)
+		b.custom_minimum_size.x = 100
 		b.pressed.connect(spec[1])
 		hb.add_child(b)
+
+
+## Comandi della telecamera (oltre a trascinare col mouse, rotella e tasti Q/E).
+func _build_cam() -> void:
+	var p := PanelContainer.new()
+	p.add_theme_stylebox_override("panel", UI.paper(true, 10))
+	p.mouse_filter = Control.MOUSE_FILTER_STOP
+	p.position = Vector2(LX + LW + 20, 90)
+	add_child(p)
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 4)
+	p.add_child(vb)
+	var hb := HBoxContainer.new()
+	hb.add_theme_constant_override("separation", 4)
+	vb.add_child(hb)
+	for spec in [["◀", "Ruota a sinistra", func(): board.rotate_view(-30)], ["▶", "Ruota a destra", func(): board.rotate_view(30)],
+			["+", "Avvicina", func(): board.zoom(0.85)], ["−", "Allontana", func(): board.zoom(1.18)]]:
+		var b := UI.button(spec[0], 50, 44, 24)
+		b.tooltip_text = spec[1]
+		b.pressed.connect(spec[2])
+		hb.add_child(b)
+	var hb2 := HBoxContainer.new()
+	hb2.add_theme_constant_override("separation", 4)
+	vb.add_child(hb2)
+	var v1 := UI.button("Vista", 100, 40, 19)
+	v1.tooltip_text = "Alterna la vista dal fondo del tabellone e quella di lato"
+	v1.pressed.connect(func(): board.cycle_view())
+	hb2.add_child(v1)
+	var v2 := UI.button("Dall'alto", 112, 40, 19)
+	v2.pressed.connect(func(): board.reset_view(true))
+	hb2.add_child(v2)
 
 
 func _build_left() -> void:
@@ -152,12 +188,12 @@ func _build_right() -> void:
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 8)
 	p.add_child(vb)
-	vb.add_child(UI.title("MERCATO NERO", 24))
+	vb.add_child(UI.title("Mercato nero", 34))
 	market_box = VBoxContainer.new()
 	market_box.add_theme_constant_override("separation", 4)
 	vb.add_child(market_box)
 	vb.add_child(HSeparator.new())
-	var dl := UI.label("Ultimo tiro", 22, UI.GOLD, UI.font_bold)
+	var dl := UI.title("Ultimo tiro", 28)
 	vb.add_child(dl)
 	dice_box = HBoxContainer.new()
 	dice_box.add_theme_constant_override("separation", 10)
@@ -172,7 +208,7 @@ func _build_right() -> void:
 		refresh())
 	vb.add_child(odds)
 	vb.add_child(HSeparator.new())
-	vb.add_child(UI.label("Cronaca", 22, UI.GOLD, UI.font_bold))
+	vb.add_child(UI.title("Cronaca", 28))
 	chron = RichTextLabel.new()
 	chron.bbcode_enabled = true
 	chron.scroll_following = true
@@ -180,20 +216,20 @@ func _build_right() -> void:
 	chron.add_theme_font_size_override("normal_font_size", 18)
 	chron.add_theme_font_size_override("bold_font_size", 18)
 	vb.add_child(chron)
-	var help := UI.label("Trascina: ruota · rotella/pizzico: zoom\nTasto destro o Maiusc+trascina: sposta", 16, Color("#8fb3aa"))
+	var help := UI.label("Trascina col mouse: ruota · rotella: zoom\nTasto destro o Maiusc+trascina: sposta", 16, UI.INK2, UI.font_italic)
 	vb.add_child(help)
 
 
 func _build_action() -> void:
 	act_panel = PanelContainer.new()
-	act_panel.add_theme_stylebox_override("panel", UI.panel_style(Color("#061615f0"), UI.GOLD, 2, 10))
+	act_panel.add_theme_stylebox_override("panel", UI.paper(true, 24))
 	act_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	act_panel.custom_minimum_size = Vector2(RX - LX - LW - 40, 0)
 	add_child(act_panel)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 10)
 	act_panel.add_child(vb)
-	act_title = UI.label("", 24, Color.WHITE, UI.font_bold)
+	act_title = UI.label("", 24, UI.INK, UI.font_bold)
 	act_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	act_title.custom_minimum_size = Vector2(RX - LX - LW - 70, 0)
 	vb.add_child(act_title)
@@ -239,7 +275,7 @@ func _phase_text() -> String:
 
 
 func _refresh_top() -> void:
-	top_lbl.text = "MANILA · VIAGGIO %d" % maxi(1, engine.voyage)
+	top_lbl.text = "Manila · viaggio %d" % maxi(1, engine.voyage)
 	var t := _phase_text()
 	if engine.hm >= 0 and engine.phase != "auction":
 		t += " · capitano del porto: %s" % engine.pname(engine.hm)
@@ -251,6 +287,19 @@ func _refresh_top() -> void:
 	if engine.roll_no > 0 and engine.phase in ["place", "pilot"]:
 		t += " · tiri fatti: %d" % engine.roll_no
 	sub_lbl.text = t
+
+
+## Colore della merce leggibile sulla pergamena.
+func wcol(w: int) -> Color:
+	return Color("#8a6a1e") if w == 2 else D.WARES[w]["color"].darkened(0.25)
+
+
+## Colore del giocatore leggibile sulla pergamena.
+func pcol(cid: int) -> Color:
+	match cid:
+		0: return Color("#2a2a2e")
+		2: return Color("#9a7600")
+	return D.COLORS[cid]["color"].darkened(0.12)
 
 
 func _can_see(s: int) -> bool:
@@ -273,10 +322,10 @@ func _refresh_rows() -> void:
 
 func _player_row(s: int) -> Control:
 	var p: Dictionary = engine.players[s]
-	var col: Color = D.COLORS[p["color"]]["light"]
+	var col: Color = pcol(p["color"])
 	var box := PanelContainer.new()
 	var active: bool = engine.current == s and not engine.game_over
-	box.add_theme_stylebox_override("panel", UI.panel_style(Color(0.03, 0.09, 0.09, 0.9), col if active else Color("#2f5d57"), 3 if active else 1, 8))
+	box.add_theme_stylebox_override("panel", UI.paper(active, 18))
 	box.mouse_filter = Control.MOUSE_FILTER_STOP
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 4)
@@ -284,29 +333,35 @@ func _player_row(s: int) -> Control:
 	var hb := HBoxContainer.new()
 	hb.add_theme_constant_override("separation", 8)
 	vb.add_child(hb)
-	hb.add_child(UI.icon_rect(UI.pawn(p["color"]), Vector2(44, 44)))
+	var badge := Panel.new()
+	badge.custom_minimum_size = Vector2(52, 52)
+	badge.add_theme_stylebox_override("panel", UI.panel_style(Color(col, 0.22), col, 3, 26))
+	var pwi := UI.icon_rect(UI.pawn(p["color"]), Vector2(44, 44))
+	pwi.position = Vector2(4, 3)
+	badge.add_child(pwi)
+	hb.add_child(badge)
 	var nv := VBoxContainer.new()
 	nv.add_theme_constant_override("separation", -4)
 	nv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hb.add_child(nv)
-	var nm := UI.label(p["name"] + ("  (IA)" if p["ai"] else ""), 24, col, UI.font_bold)
+	var nm := UI.title(p["name"] + ("  (IA)" if p["ai"] else ""), 30, col)
 	nm.clip_text = true
 	nm.custom_minimum_size = Vector2(150, 0)
 	nv.add_child(nm)
 	var tags := []
 	if engine.hm == s:
-		tags.append("CAPITANO DEL PORTO")
+		tags.append("capitano del porto")
 	if engine.phase in ["place", "roll", "pilot", "board"] and engine.passed.size() > s and engine.passed[s]:
 		tags.append("ha passato")
 	if engine.phase == "auction" and engine.auction.get("out", {}).has(s):
 		tags.append("fuori dall'asta")
 	if engine.phase == "auction" and int(engine.auction.get("leader", -1)) == s and not engine.opts.get("bgg", false):
 		tags.append("offre %d" % engine.auction["cur"])
-	nv.add_child(UI.label(" · ".join(tags), 17, UI.GOLD))
+	nv.add_child(UI.label(" · ".join(tags), 17, UI.CORAL, UI.font_bold))
 	var money := HBoxContainer.new()
 	money.add_theme_constant_override("separation", 4)
 	money.add_child(UI.icon_rect(UI.coin(1), Vector2(30, 30)))
-	money.add_child(UI.label("%d" % p["cash"], 28, Color.WHITE, UI.font_bold))
+	money.add_child(UI.label("%d" % p["cash"], 30, UI.INK, UI.font_heavy))
 	hb.add_child(money)
 	# quote
 	var sh := HBoxContainer.new()
@@ -325,7 +380,7 @@ func _player_row(s: int) -> Control:
 		if x["m"]:
 			var ml := UI.label("12", 16, UI.RED, UI.font_bold)
 			ml.position = Vector2(6, 34)
-			ml.add_theme_color_override("font_outline_color", Color.BLACK)
+			ml.add_theme_color_override("font_outline_color", UI.SAND)
 			ml.add_theme_constant_override("outline_size", 4)
 			holder.add_child(ml)
 		holder.tooltip_text = ("%s, %s" % [D.ware_name(x["w"]), "impegnata (12 ricevuti, 15 da restituire)" if x["m"] else "libera"]) if see else ("quota coperta" + (", impegnata" if x["m"] else ""))
@@ -341,7 +396,7 @@ func _player_row(s: int) -> Control:
 	for k in hand:
 		sh.add_child(UI.icon_rect(UI.pawn(p["color"]), Vector2(26, 34)))
 	if see:
-		vb.add_child(UI.label("Patrimonio ora: %d" % engine.wealth(s), 17, Color("#9fc4ba")))
+		vb.add_child(UI.label("Patrimonio ora: %d" % engine.wealth(s), 17, UI.INK2, UI.font_italic))
 	return box
 
 
@@ -353,7 +408,7 @@ func _refresh_market() -> void:
 		var hb := HBoxContainer.new()
 		hb.add_theme_constant_override("separation", 8)
 		hb.add_child(UI.icon_rect(UI.card(w), Vector2(30, 48)))
-		var nm := UI.label(D.ware_name(w), 22, D.WARES[w]["light"], UI.font_bold)
+		var nm := UI.label(D.ware_name(w), 22, wcol(w), UI.font_bold)
 		nm.custom_minimum_size = Vector2(130, 0)
 		hb.add_child(nm)
 		var idx: int = engine.market[w]
@@ -363,18 +418,18 @@ func _refresh_market() -> void:
 			var cell := Panel.new()
 			cell.custom_minimum_size = Vector2(24, 26)
 			var on := k == idx
-			cell.add_theme_stylebox_override("panel", UI.panel_style(D.WARES[w]["color"] if k <= idx else Color("#0a1716"), UI.GOLD if on else Color("#2f5d57"), 2 if on else 1, 3))
+			cell.add_theme_stylebox_override("panel", UI.panel_style(D.WARES[w]["color"] if k <= idx else Color(0.42, 0.29, 0.17, 0.12), UI.CORAL if on else Color(0.42, 0.29, 0.17, 0.5), 3 if on else 1, 4))
 			cell.tooltip_text = "%d" % D.MARKET[k]
 			bar.add_child(cell)
 		hb.add_child(bar)
-		var vl := UI.label("%d" % D.MARKET[idx], 26, Color.WHITE, UI.font_bold)
+		var vl := UI.label("%d" % D.MARKET[idx], 28, UI.INK, UI.font_heavy)
 		vl.custom_minimum_size = Vector2(36, 0)
 		vl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		hb.add_child(vl)
 		hb.tooltip_text = "%s: vale %d · quote disponibili %d · prezzo %d" % [D.ware_name(w), D.MARKET[idx], engine.supply[w], engine.share_price(w)]
 		hb.mouse_filter = Control.MOUSE_FILTER_STOP
 		market_box.add_child(hb)
-	market_box.add_child(UI.label("Quote in vendita: %s" % "  ".join(range(4).map(func(w): return "%s %d" % [D.WARES[w]["short"], engine.supply[w]])), 17, Color("#9fc4ba")))
+	market_box.add_child(UI.label("Quote in vendita: %s" % "  ".join(range(4).map(func(w): return "%s %d" % [D.WARES[w]["short"], engine.supply[w]])), 17, UI.INK2, UI.font_italic))
 
 
 func _refresh_dice() -> void:
@@ -444,7 +499,7 @@ func _idle_message() -> void:
 func _on_log(t: String) -> void:
 	var line := t
 	if t.begins_with("—"):
-		line = "\n[b][color=#f0c24f]%s[/color][/b]" % t
+		line = "\n[b][color=#b8431f]%s[/color][/b]" % t
 	chron.append_text(line + "\n")
 	if pending.is_empty():
 		_idle_message()
@@ -530,10 +585,10 @@ func _bid_ui(req: Dictionary, blind: bool) -> void:
 	var hb := HBoxContainer.new()
 	hb.add_theme_constant_override("separation", 10)
 	act_body.add_child(hb)
-	var lbl := UI.label("", 34, UI.GOLD, UI.font_bold)
+	var lbl := UI.label("", 36, UI.CORAL, UI.font_heavy)
 	lbl.custom_minimum_size = Vector2(90, 0)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var info := UI.label("", 19, Color("#9fc4ba"))
+	var info := UI.label("", 19, UI.INK2, UI.font_italic)
 	var upd := func():
 		lbl.text = str(val[0])
 		info.text = "contanti %d · massimo con i prestiti %d" % [cash, mx] + ("  (dovrai impegnare quote)" if val[0] > cash else "")
@@ -550,11 +605,11 @@ func _bid_ui(req: Dictionary, blind: bool) -> void:
 			val[0] = clampi(val[0] + d, mn, mx)
 			upd.call())
 		hb.add_child(b2)
-	var ok := UI.primary(UI.button("CONFERMA" if blind else "OFFRI", 180, 52, 22))
+	var ok := UI.primary(UI.button("Conferma" if blind else "Offri", 180, 52, 22))
 	ok.pressed.connect(func(): _provide(val[0]))
 	hb.add_child(ok)
 	if not blind:
-		var ps := UI.button("PASSA", 150, 52, 22)
+		var ps := UI.button("Passa", 150, 52, 22)
 		ps.pressed.connect(func(): _provide(0))
 		hb.add_child(ps)
 	act_body.add_child(info)
@@ -574,7 +629,7 @@ func _buy_ui(req: Dictionary) -> void:
 		b.tooltip_text = "%s vale ora %d al mercato nero; ne restano %d." % [D.ware_name(w), D.MARKET[engine.market[w]], engine.supply[w]]
 		b.pressed.connect(func(): _provide(w))
 		f.add_child(b)
-	var no := UI.button("NESSUNA QUOTA", 220, 120, 22)
+	var no := UI.button("Nessuna quota", 220, 120, 22)
 	no.pressed.connect(func(): _provide(-1))
 	f.add_child(no)
 
@@ -588,7 +643,7 @@ func _load_ui(req: Dictionary) -> void:
 
 func _load_body() -> void:
 	_clear_body()
-	act_body.add_child(UI.label("Merce che resta a terra:", 20, Color("#cfe3dc")))
+	act_body.add_child(UI.label("Merce che resta a terra:", 20, UI.INK2, UI.font_italic))
 	var f := _flow()
 	for w in 4:
 		var b := Button.new()
@@ -598,7 +653,7 @@ func _load_body() -> void:
 		b.expand_icon = true
 		b.add_theme_font_size_override("font_size", 20)
 		if w == load_sel["ex"]:
-			b.add_theme_stylebox_override("normal", UI.panel_style(Color("#5a2a1a"), UI.RED, 3, 5))
+			UI.primary(b)
 			b.text += " (a terra)"
 		b.pressed.connect(func():
 			load_sel["ex"] = w
@@ -616,7 +671,7 @@ func _load_body() -> void:
 			continue
 		var li := lane
 		var col := VBoxContainer.new()
-		col.add_child(UI.label(D.ware_name(w), 20, D.WARES[w]["light"], UI.font_bold))
+		col.add_child(UI.label(D.ware_name(w), 20, wcol(w), UI.font_bold))
 		var row := HBoxContainer.new()
 		var m := UI.button("−", 48, 46, 24)
 		m.text = "-"
@@ -624,7 +679,7 @@ func _load_body() -> void:
 			load_sel["p"][li] = maxi(0, int(load_sel["p"][li]) - 1)
 			_load_body())
 		row.add_child(m)
-		var vl := UI.label(str(load_sel["p"][li]), 30, Color.WHITE, UI.font_bold)
+		var vl := UI.label(str(load_sel["p"][li]), 32, UI.INK, UI.font_heavy)
 		vl.custom_minimum_size = Vector2(40, 0)
 		vl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		row.add_child(vl)
@@ -635,12 +690,12 @@ func _load_body() -> void:
 		row.add_child(pl)
 		col.add_child(row)
 		var dd := MNAI.dist(int(load_sel["p"][li]), 3)
-		col.add_child(UI.label("arriva %d%%" % roundi(dd[0] * 100), 17, Color("#9fc4ba")))
+		col.add_child(UI.label("arriva %d%%" % roundi(dd[0] * 100), 17, UI.INK2, UI.font_italic))
 		grid.add_child(col)
 		lane += 1
 	var right := VBoxContainer.new()
 	right.add_child(UI.label("Somma: %d / 9" % sum, 24, UI.GREEN if sum == 9 else UI.RED, UI.font_bold))
-	var ok := UI.primary(UI.button("METTI IN ACQUA", 230, 52, 22))
+	var ok := UI.primary(UI.button("Metti in acqua", 230, 52, 22))
 	ok.disabled = sum != 9
 	ok.pressed.connect(func():
 		board.set_preview({})
@@ -711,14 +766,14 @@ func _place_ui(req: Dictionary) -> void:
 			tipt = "Se un barcone arriva in quella casella guadagni il doppio della scommessa."
 		b.tooltip_text = tipt
 		if o["k"] == "pass":
-			b.add_theme_color_override("font_color", Color("#ffb0a0"))
+			b.add_theme_stylebox_override("normal", UI.plank("wood_dark"))
 		f.add_child(b)
 	board.set_targets(targets)
 	# suggerimento leggero: la mossa che l'IA giudica migliore
 	var best: int = ai._place(engine, s, req) if config.get("hints", true) else -1
 	if best >= 0 and best < f.get_child_count():
 		var bb2: Button = f.get_child(best)
-		bb2.add_theme_stylebox_override("normal", UI.panel_style(Color("#173f2c"), UI.GREEN, 2, 5))
+		UI.selected(bb2, "sea")
 		bb2.tooltip_text += "\n(consiglio dell'IA)"
 
 
@@ -741,7 +796,7 @@ func _options_ui(req: Dictionary) -> void:
 		var s: int = req["seat"]
 		var best: int = engine.ais[s]._pilot(engine, s, req)
 		if best >= 0 and best < f.get_child_count():
-			(f.get_child(best) as Button).add_theme_stylebox_override("normal", UI.panel_style(Color("#173f2c"), UI.GREEN, 2, 5))
+			UI.selected(f.get_child(best) as Button, "sea")
 	board.set_targets(targets)
 
 
@@ -775,17 +830,17 @@ func _open_modal(title_text: String, w := 700.0) -> VBoxContainer:
 	_clear_modal()
 	modal.mouse_filter = Control.MOUSE_FILTER_STOP
 	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.5)
+	shade.color = Color(0.01, 0.12, 0.13, 0.55)
 	shade.size = Vector2(1920, 1080)
 	modal.add_child(shade)
 	var box := PanelContainer.new()
-	box.add_theme_stylebox_override("panel", UI.panel_style(Color("#061615f6"), UI.GOLD, 2, 10))
+	box.add_theme_stylebox_override("panel", UI.paper(false, 34))
 	box.custom_minimum_size = Vector2(w, 0)
 	modal.add_child(box)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 12)
 	box.add_child(vb)
-	var t := UI.title(title_text, 32)
+	var t := UI.title(title_text, 40)
 	t.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	t.custom_minimum_size = Vector2(w - 30, 0)
 	vb.add_child(t)
@@ -804,7 +859,7 @@ func _curtain(s: int, then: Callable) -> void:
 	_clear_modal()
 	modal.mouse_filter = Control.MOUSE_FILTER_STOP
 	var shade := ColorRect.new()
-	shade.color = Color(0.01, 0.03, 0.03, 0.97)
+	shade.color = Color(0.02, 0.2, 0.22, 0.97)
 	shade.size = Vector2(1920, 1080)
 	modal.add_child(shade)
 	var vb := VBoxContainer.new()
@@ -812,9 +867,9 @@ func _curtain(s: int, then: Callable) -> void:
 	vb.add_theme_constant_override("separation", 20)
 	modal.add_child(vb)
 	vb.add_child(UI.icon_rect(UI.pawn(engine.players[s]["color"]), Vector2(120, 120)))
-	vb.add_child(UI.title("Tocca a %s" % engine.pname(s), 44))
-	vb.add_child(UI.label("Offerta segreta: gli altri non guardino lo schermo.", 24))
-	var b := UI.primary(UI.button("SONO PRONTO", 280, 60, 26))
+	vb.add_child(UI.title("Tocca a %s" % engine.pname(s), 56, UI.LIGHT))
+	vb.add_child(UI.label("Offerta segreta: gli altri non guardino lo schermo.", 24, UI.SAND))
+	var b := UI.primary(UI.button("Sono pronto", 280, 60, 26))
 	b.pressed.connect(func():
 		_clear_modal()
 		then.call())
@@ -836,13 +891,13 @@ func _on_pause(req: Dictionary) -> void:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
 		row.add_child(UI.icon_rect(UI.pawn(engine.players[s]["color"]), Vector2(40, 40)))
-		var nm := UI.label(engine.pname(s), 24, D.COLORS[engine.players[s]["color"]]["light"], UI.font_bold)
+		var nm := UI.label(engine.pname(s), 24, pcol(engine.players[s]["color"]), UI.font_bold)
 		nm.custom_minimum_size = Vector2(170, 0)
 		row.add_child(nm)
-		var tl := UI.label(("%s%d" % ["+" if tot >= 0 else "", tot]) if not items.is_empty() else "—", 26, UI.GOLD if tot > 0 else Color.WHITE, UI.font_bold)
+		var tl := UI.label(("%s%d" % ["+" if tot >= 0 else "", tot]) if not items.is_empty() else "—", 28, UI.GREEN if tot > 0 else UI.INK, UI.font_heavy)
 		tl.custom_minimum_size = Vector2(70, 0)
 		row.add_child(tl)
-		var dl := UI.label(", ".join(parts), 18, Color("#cfe3dc"))
+		var dl := UI.label(", ".join(parts), 18, UI.INK2)
 		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		dl.custom_minimum_size = Vector2(430, 0)
 		row.add_child(dl)
@@ -850,10 +905,10 @@ func _on_pause(req: Dictionary) -> void:
 	var mk := []
 	for w in 4:
 		mk.append("%s %d" % [D.WARES[w]["short"], D.MARKET[engine.market[w]]])
-	vb.add_child(UI.label("Mercato nero: " + "  ·  ".join(mk), 21, Color("#9fc4ba")))
+	vb.add_child(UI.label("Mercato nero: " + "  ·  ".join(mk), 21, UI.INK2, UI.font_italic))
 	if req.get("over", false):
-		vb.add_child(UI.label("Una merce ha raggiunto 30: la partita è finita!", 24, UI.GOLD, UI.font_bold))
-	var ok := UI.primary(UI.button("RISULTATI" if req.get("over", false) else "PROSSIMO VIAGGIO", 300, 58, 24))
+		vb.add_child(UI.label("Una merce ha raggiunto 30: la partita è finita!", 24, UI.CORAL, UI.font_bold))
+	var ok := UI.primary(UI.button("Risultati" if req.get("over", false) else "Prossimo viaggio", 300, 58, 24))
 	ok.pressed.connect(func():
 		_clear_modal()
 		engine.provide_decision(null))
@@ -866,49 +921,49 @@ func _on_game_end(results: Array) -> void:
 		online_status("")
 	refresh()
 	var vb := _open_modal("%s è il contrabbandiere più bravo di Manila!" % engine.pname(results[0]["seat"]), 900)
-	vb.add_child(UI.label("Patrimonio = pesos + valore delle quote − 15 per ogni quota ancora impegnata.", 20, Color("#cfe3dc")))
+	vb.add_child(UI.label("Patrimonio = pesos + valore delle quote − 15 per ogni quota ancora impegnata.", 20, UI.INK2, UI.font_italic))
 	var place := 1
 	for e in results:
 		var p: Dictionary = engine.players[e["seat"]]
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 14)
-		row.add_child(UI.title("%d°" % place, 34, Color.WHITE))
+		row.add_child(UI.title("%d°" % place, 38, UI.CORAL))
 		row.add_child(UI.icon_rect(UI.pawn(p["color"]), Vector2(52, 52)))
-		var nm := UI.label(p["name"] + (" (IA)" if p["ai"] else ""), 28, D.COLORS[p["color"]]["light"], UI.font_bold)
+		var nm := UI.label(p["name"] + (" (IA)" if p["ai"] else ""), 28, pcol(p["color"]), UI.font_bold)
 		nm.custom_minimum_size = Vector2(300, 0)
 		row.add_child(nm)
-		var wl := UI.label("%d" % e["wealth"], 32, UI.GOLD, UI.font_bold)
+		var wl := UI.label("%d" % e["wealth"], 34, UI.CORAL, UI.font_heavy)
 		wl.custom_minimum_size = Vector2(70, 0)
 		wl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		row.add_child(wl)
-		row.add_child(UI.label("   pesos %d · quote %d%s" % [e["cash"], e["shares"], (" · prestiti −%d" % (15 * e["mort"])) if e["mort"] > 0 else ""], 22, Color("#cfe3dc")))
+		row.add_child(UI.label("   pesos %d · quote %d%s" % [e["cash"], e["shares"], (" · prestiti −%d" % (15 * e["mort"])) if e["mort"] > 0 else ""], 22, UI.INK2))
 		vb.add_child(row)
 		place += 1
 	var br := HBoxContainer.new()
 	br.add_theme_constant_override("separation", 16)
 	br.alignment = BoxContainer.ALIGNMENT_CENTER
 	if online == null:
-		var again := UI.primary(UI.button("RIGIOCA", 220, 60, 26))
+		var again := UI.primary(UI.button("Rigioca", 220, 60, 26))
 		again.pressed.connect(func():
 			var cfg := config.duplicate(true)
 			cfg.erase("seed")
 			main.start_game(cfg))
 		br.add_child(again)
-	var see := UI.button("GUARDA IL PORTO", 260, 60, 24)
+	var see := UI.button("Guarda il porto", 260, 60, 24)
 	see.pressed.connect(func():
 		_clear_modal()
 		_clear_body()
 		act_title.text = "Partita finita."
-		var m := UI.button("RISULTATI", 180, 50, 22)
+		var m := UI.button("Risultati", 180, 50, 22)
 		m.pressed.connect(func(): _on_game_end(results))
 		var f := _flow()
 		f.add_child(m)
-		var mm := UI.button("MENU", 140, 50, 22)
+		var mm := UI.button("Menu", 140, 50, 22)
 		mm.pressed.connect(func(): main.show_menu())
 		f.add_child(mm)
 		_place_action.call_deferred())
 	br.add_child(see)
-	var menu := UI.button("MENU", 180, 60, 26)
+	var menu := UI.button("Menu", 180, 60, 26)
 	menu.pressed.connect(func(): main.show_menu())
 	br.add_child(menu)
 	vb.add_child(br)
@@ -920,11 +975,11 @@ func _ask_quit() -> void:
 	layer.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(layer)
 	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.6)
+	shade.color = Color(0.01, 0.12, 0.13, 0.6)
 	shade.size = layer.size
 	layer.add_child(shade)
 	var box := PanelContainer.new()
-	box.add_theme_stylebox_override("panel", UI.panel_style(Color("#061615f8"), UI.GOLD, 2, 10))
+	box.add_theme_stylebox_override("panel", UI.paper(false, 30))
 	box.position = Vector2(660, 400)
 	layer.add_child(box)
 	var vb := VBoxContainer.new()
@@ -934,9 +989,9 @@ func _ask_quit() -> void:
 	vb.add_child(UI.label("La partita in corso andrà persa." if online == null else "Potrai rientrare nella stanza con lo stesso codice.", 22))
 	var hb := HBoxContainer.new()
 	hb.add_theme_constant_override("separation", 16)
-	var y := UI.primary(UI.button("SÌ, AL MENU", 240, 56, 24))
+	var y := UI.primary(UI.button("Sì, al menu", 240, 56, 24))
 	y.pressed.connect(func(): main.show_menu())
-	var no := UI.button("CONTINUA A GIOCARE", 300, 56, 24)
+	var no := UI.button("Continua a giocare", 300, 56, 24)
 	no.pressed.connect(func(): layer.queue_free())
 	hb.add_child(y)
 	hb.add_child(no)
@@ -949,7 +1004,7 @@ func _show_rules_popup() -> void:
 	layer.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(layer)
 	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.75)
+	shade.color = Color(0.01, 0.12, 0.13, 0.75)
 	shade.size = layer.size
 	layer.add_child(shade)
 	var rv := preload("res://scripts/ui/rules_view.gd").new()
@@ -964,24 +1019,24 @@ func _show_log() -> void:
 	layer.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(layer)
 	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.7)
+	shade.color = Color(0.01, 0.12, 0.13, 0.7)
 	shade.size = layer.size
 	layer.add_child(shade)
 	var box := PanelContainer.new()
-	box.add_theme_stylebox_override("panel", UI.panel_style(Color("#061615f8"), UI.GOLD, 2, 10))
+	box.add_theme_stylebox_override("panel", UI.paper(false, 30))
 	box.position = Vector2(360, 70)
 	box.size = Vector2(1200, 940)
 	layer.add_child(box)
 	var vb := VBoxContainer.new()
 	box.add_child(vb)
-	vb.add_child(UI.title("DIARIO DELLA PARTITA", 30))
+	vb.add_child(UI.title("Diario di bordo", 40))
 	var t := RichTextLabel.new()
 	t.custom_minimum_size = Vector2(1170, 800)
 	t.scroll_following = true
 	t.add_theme_font_size_override("normal_font_size", 20)
 	t.text = "\n".join(engine.log_lines)
 	vb.add_child(t)
-	var c := UI.button("CHIUDI", 180, 50, 22)
+	var c := UI.button("Chiudi", 180, 50, 22)
 	c.pressed.connect(func(): layer.queue_free())
 	vb.add_child(c)
 
@@ -998,10 +1053,10 @@ func _unhandled_input(ev: InputEvent) -> void:
 
 func _build_online_label() -> void:
 	var p := PanelContainer.new()
-	p.add_theme_stylebox_override("panel", UI.panel_style(Color("#000000cc"), UI.GOLD, 2, 8))
+	p.add_theme_stylebox_override("panel", UI.plank("sea", 12))
 	p.position = Vector2(LX + LW + 20, 90)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	online_lbl = UI.label("", 22, Color.WHITE)
+	online_lbl = UI.label("", 22, UI.LIGHT, UI.font_bold)
 	p.add_child(online_lbl)
 	add_child(p)
 	p.visible = false

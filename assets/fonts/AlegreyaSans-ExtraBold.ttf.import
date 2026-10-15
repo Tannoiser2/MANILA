@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://c51sum7kho2vb"
-path="res://.godot/imported/BarlowCondensed-Medium.ttf-4c02ab878ad95017fc2de4e60505ca75.fontdata"
+uid="uid://23aosud7g2a3"
+path="res://.godot/imported/AlegreyaSans-ExtraBold.ttf-4163580433febf3231edaf56aa3b33e3.fontdata"
 
 [deps]
 
-source_file="res://assets/fonts/BarlowCondensed-Medium.ttf"
-dest_files=["res://.godot/imported/BarlowCondensed-Medium.ttf-4c02ab878ad95017fc2de4e60505ca75.fontdata"]
+source_file="res://assets/fonts/AlegreyaSans-ExtraBold.ttf"
+dest_files=["res://.godot/imported/AlegreyaSans-ExtraBold.ttf-4163580433febf3231edaf56aa3b33e3.fontdata"]
 
 [params]
 

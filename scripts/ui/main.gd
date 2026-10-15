@@ -21,9 +21,12 @@ func get_net() -> Net:
 func _ready() -> void:
 	theme = UI.make_theme()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# la radice non deve trattenere il mouse: altrimenti il porto 3D non riceve trascinamenti e rotella
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bg = ColorRect.new()
 	bg.color = Color("#06100f")
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
 	show_menu()
 

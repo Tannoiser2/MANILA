@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://d3mntv7xd6ir2"
-path="res://.godot/imported/BarlowCondensed-BoldItalic.ttf-0e69fd6ad5a5b42952216a4f8001fed3.fontdata"
+uid="uid://dknk87ar8pixi"
+path="res://.godot/imported/AlegreyaSans-BoldItalic.ttf-b3a29e94e8f7fd966c840fd007930baa.fontdata"
 
 [deps]
 
-source_file="res://assets/fonts/BarlowCondensed-BoldItalic.ttf"
-dest_files=["res://.godot/imported/BarlowCondensed-BoldItalic.ttf-0e69fd6ad5a5b42952216a4f8001fed3.fontdata"]
+source_file="res://assets/fonts/AlegreyaSans-BoldItalic.ttf"
+dest_files=["res://.godot/imported/AlegreyaSans-BoldItalic.ttf-b3a29e94e8f7fd966c840fd007930baa.fontdata"]
 
 [params]
 

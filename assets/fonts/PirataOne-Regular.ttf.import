@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://dqbbbxtymxs1p"
-path="res://.godot/imported/BarlowCondensed-SemiBold.ttf-a61dd99857b2d1cd6578199d7509bfaf.fontdata"
+uid="uid://sqgornf88mrk"
+path="res://.godot/imported/PirataOne-Regular.ttf-6b8bc6b65a8146f68fdd1dea30bf14c3.fontdata"
 
 [deps]
 
-source_file="res://assets/fonts/BarlowCondensed-SemiBold.ttf"
-dest_files=["res://.godot/imported/BarlowCondensed-SemiBold.ttf-a61dd99857b2d1cd6578199d7509bfaf.fontdata"]
+source_file="res://assets/fonts/PirataOne-Regular.ttf"
+dest_files=["res://.godot/imported/PirataOne-Regular.ttf-6b8bc6b65a8146f68fdd1dea30bf14c3.fontdata"]
 
 [params]
 
